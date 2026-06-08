@@ -42,6 +42,21 @@ Copy `.env.example` to `.env` and fill in your provider key.
 cp .env.example .env
 ```
 
+Current default LLM mode uses an online OpenAI-compatible API:
+
+```bash
+AI_PROVIDER=openai-compatible
+LLM_BASE_URL=https://api.openai.com/v1
+LLM_MODEL=gpt-4o-mini
+LLM_API_KEY=your_api_key_here
+```
+
+The provider layer is intentionally flexible. Later, a local model can be introduced by either:
+
+1. Switching `LLM_BASE_URL` to a local OpenAI-compatible endpoint such as vLLM, Ollama, LM Studio, or llama.cpp server.
+2. Switching `AI_PROVIDER=local` and implementing the reserved `LocalModelProvider` adapter.
+
+
 ## Architecture Plan
 
 完整規劃請看：[`docs/architecture.md`](docs/architecture.md)
