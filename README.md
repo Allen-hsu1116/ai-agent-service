@@ -42,10 +42,29 @@ Copy `.env.example` to `.env` and fill in your provider key.
 cp .env.example .env
 ```
 
+## Architecture Plan
+
+完整規劃請看：[`docs/architecture.md`](docs/architecture.md)
+
+架構會逐步支援：
+
+- Agent Runtime
+- System Prompt Builder
+- Skill Loader / Skill Registry
+- Tool Registry
+- MCP Client / MCP Server 管理
+- Memory / Session Storage
+- Model Provider Abstraction
+- Background Jobs
+- Safety / Permission Layer
+
 ## Roadmap
 
 - [ ] Agent runtime abstraction
+- [ ] System prompt builder
+- [ ] Skill loader and skill registry
 - [ ] Tool registry
+- [ ] MCP client integration
 - [ ] Conversation/session storage
 - [ ] Provider adapters
 - [ ] Background job queue
