@@ -1,0 +1,26 @@
+# Git and local metadata
+.git
+.gitignore
+.dockerignore
+
+# Python caches and build output
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+src/*.egg-info/
+build/
+dist/
+
+# Local environments and secrets
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

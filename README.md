@@ -16,8 +16,15 @@ ai-agent-service/
 ├── src/ai_agent_service/
 │   ├── __init__.py
 │   └── main.py
+├── docs/
+│   ├── architecture.md
+│   ├── docker-deployment.md
+│   └── examples/skills-and-tools.md
+├── examples/skills/
+├── .dockerignore
 ├── .env.example
 ├── .gitignore
+├── docker-compose.yml
 ├── Dockerfile
 ├── pyproject.toml
 └── README.md
@@ -60,6 +67,10 @@ The provider layer is intentionally flexible. Later, a local model can be introd
 ## Architecture Plan
 
 完整規劃請看：[`docs/architecture.md`](docs/architecture.md)
+
+## Docker Deployment
+
+Linux Docker 實際部署流程請看：[`docs/docker-deployment.md`](docs/docker-deployment.md)
 
 ## Skill and Tool Examples
 
