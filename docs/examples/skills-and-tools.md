@@ -35,13 +35,15 @@ Tool 會真的執行程式，所以需要權限、錯誤處理與 audit log。
 
 ## Example Skills
 
-這個 repo 已提供三個簡單範例：
+這個 repo 已提供四個簡單範例：
 
 ```text
 examples/skills/
 ├── bug-report-debugging/
 │   └── SKILL.md
 ├── customer-support-triage/
+│   └── SKILL.md
+├── hakuna-matata-landing-doc/
 │   └── SKILL.md
 └── release-note-writer/
     └── SKILL.md
@@ -141,6 +143,37 @@ examples/skills/
 - [ ] 檢查登入頁是否收到 `next` 參數
 - [ ] 檢查 login API response 是否包含 redirect target
 - [ ] 檢查前端登入成功 callback
+```
+
+### 4. Hakuna Matata Landing Doc
+
+路徑：[`examples/skills/hakuna-matata-landing-doc/SKILL.md`](../../examples/skills/hakuna-matata-landing-doc/SKILL.md)
+
+用途：示範可以實際使用的 keyword trigger。當訊息包含 `哈庫拉瑪塔塔`，Agent Runtime 會直接生成固定落地文檔，不需要呼叫外部 LLM。
+
+可以直接呼叫 API 測試：
+
+```bash
+curl -X POST http://127.0.0.1:8000/agent \
+  -H 'Content-Type: application/json' \
+  -d '{"message":"哈庫拉瑪塔塔"}'
+```
+
+預期輸出：
+
+```json
+{
+  "reply": "# 落地文檔\n\n真是很有意思",
+  "model": "built-in-example"
+}
+```
+
+文件內容：
+
+```markdown
+# 落地文檔
+
+真是很有意思
 ```
 
 ## Skill Format Quick Start

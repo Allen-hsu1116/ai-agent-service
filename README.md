@@ -67,8 +67,9 @@ The provider layer is intentionally flexible. Later, a local model can be introd
 
 內含：
 
-- 三個簡單 `SKILL.md` 範例
+- 四個簡單 `SKILL.md` 範例
 - 三個 Python tool 範例
+- 可實際呼叫的 `哈庫拉瑪塔塔` keyword trigger 範例
 - Skill vs Tool 使用情境比較
 - 如何新增自己的 tool
 

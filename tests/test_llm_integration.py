@@ -47,6 +47,16 @@ async def test_agent_runtime_uses_injected_provider():
     assert response.model == "fake-model"
 
 
+@pytest.mark.asyncio
+async def test_agent_runtime_generates_landing_document_for_hakuna_matata_trigger():
+    runtime = AgentRuntime(provider=FakeProvider())
+
+    response = await runtime.run("請幫我處理：哈庫拉瑪塔塔")
+
+    assert response.model == "built-in-example"
+    assert response.reply == "# 落地文檔\n\n真是很有意思"
+
+
 def test_agent_endpoint_uses_configured_runtime_dependency_override():
     app.dependency_overrides.clear()
 
