@@ -61,6 +61,18 @@ The provider layer is intentionally flexible. Later, a local model can be introd
 
 完整規劃請看：[`docs/architecture.md`](docs/architecture.md)
 
+## Skill and Tool Examples
+
+範例說明請看：[`docs/examples/skills-and-tools.md`](docs/examples/skills-and-tools.md)
+
+內含：
+
+- 三個簡單 `SKILL.md` 範例
+- 三個 Python tool 範例
+- Skill vs Tool 使用情境比較
+- 如何新增自己的 tool
+
+
 架構會逐步支援：
 
 - Agent Runtime
