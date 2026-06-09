@@ -1,26 +1,36 @@
 # AI Agent Service
 
-一套準備用來架設 AI Agent 服務的公開專案骨架。
+一套可本機啟動、可呼叫 LLM、可保存對話資料、並提供 read-only SQL 查詢的 AI Agent Service 基礎專案。
 
-## 目標
+## 目前已支援
 
-- 提供可擴充的 AI Agent API 服務
-- 支援工具調用、任務執行、記憶與排程等能力
-- 可用 Docker 部署
-- 後續可接入 Discord、Telegram、Web UI 或企業內部系統
+- FastAPI HTTP API
+- OpenAI-compatible LLM 呼叫
+- SQLite / SQLAlchemy 基礎資料庫
+- 自動建立資料表
+- `/agent` 對話 API
+- session / message / agent run 儲存
+- `/sessions/{session_id}/messages` 查詢對話紀錄
+- `/sql/query` read-only SQL 查詢
+- Docker / Docker Compose 啟動
 
-## 初始架構
+## 專案結構
 
 ```text
 ai-agent-service/
 ├── src/ai_agent_service/
+│   ├── agent/              # AgentRuntime
+│   ├── api/                # API schemas and SQL helper
+│   ├── core/               # Settings / config
+│   ├── db/                 # SQLAlchemy models, session, repository
+│   ├── providers/          # LLM provider abstraction
 │   ├── __init__.py
-│   └── main.py
+│   └── main.py             # FastAPI app and routes
 ├── docs/
 │   ├── architecture.md
 │   ├── docker-deployment.md
-│   └── examples/skills-and-tools.md
-├── examples/skills/
+│   └── getting-started.md
+├── tests/
 ├── .dockerignore
 ├── .env.example
 ├── .gitignore
@@ -30,16 +40,51 @@ ai-agent-service/
 └── README.md
 ```
 
-## Local Development
+## Quick Start
+
+完整流程請看：[`docs/getting-started.md`](docs/getting-started.md)
 
 ```bash
+git clone https://github.com/Allen-hsu1116/ai-agent-service.git
+cd ai-agent-service
+
 python -m venv .venv
 source .venv/bin/activate
 pip install -e .
+
+cp .env.example .env
+# 編輯 .env，填入 LLM_API_KEY
+
 uvicorn ai_agent_service.main:app --reload
 ```
 
-Open: http://127.0.0.1:8000/health
+健康檢查：
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+呼叫 Agent：
+
+```bash
+curl -X POST http://127.0.0.1:8000/agent \
+  -H 'Content-Type: application/json' \
+  -d '{"message":"請用繁體中文簡短介紹 AI Agent"}'
+```
+
+查詢 messages：
+
+```bash
+curl http://127.0.0.1:8000/sessions/1/messages
+```
+
+Read-only SQL 查詢：
+
+```bash
+curl -X POST http://127.0.0.1:8000/sql/query \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"SELECT id, role, content FROM messages ORDER BY id"}'
+```
 
 ## Environment Variables
 
@@ -56,6 +101,8 @@ AI_PROVIDER=openai-compatible
 LLM_BASE_URL=https://api.openai.com/v1
 LLM_MODEL=gpt-4o-mini
 LLM_API_KEY=your_api_key_here
+LLM_TEMPERATURE=0.2
+DATABASE_URL=sqlite:///./data/agent.db
 ```
 
 The provider layer is intentionally flexible. Later, a local model can be introduced by either:
@@ -63,49 +110,36 @@ The provider layer is intentionally flexible. Later, a local model can be introd
 1. Switching `LLM_BASE_URL` to a local OpenAI-compatible endpoint such as vLLM, Ollama, LM Studio, or llama.cpp server.
 2. Switching `AI_PROVIDER=local` and implementing the reserved `LocalModelProvider` adapter.
 
+## Docker Deployment
+
+Linux Docker 實際部署流程請看：[`docs/docker-deployment.md`](docs/docker-deployment.md)
+
+```bash
+cp .env.example .env
+docker compose up -d --build
+```
 
 ## Architecture Plan
 
 完整規劃請看：[`docs/architecture.md`](docs/architecture.md)
 
-## Docker Deployment
+## Tests
 
-Linux Docker 實際部署流程請看：[`docs/docker-deployment.md`](docs/docker-deployment.md)
-
-## Skill and Tool Examples
-
-範例說明請看：[`docs/examples/skills-and-tools.md`](docs/examples/skills-and-tools.md)
-
-內含：
-
-- 四個簡單 `SKILL.md` 範例
-- 三個 Python tool 範例
-- 可實際呼叫的 `哈庫拉瑪塔塔` keyword trigger 範例
-- Skill vs Tool 使用情境比較
-- 如何新增自己的 tool
-
-
-架構會逐步支援：
-
-- Agent Runtime
-- System Prompt Builder
-- Skill Loader / Skill Registry
-- Tool Registry
-- MCP Client / MCP Server 管理
-- Memory / Session Storage
-- Model Provider Abstraction
-- Background Jobs
-- Safety / Permission Layer
+```bash
+PYTHONPATH=src python -m pytest -q
+PYTHONPATH=src python -m ruff check .
+```
 
 ## Roadmap
 
-- [ ] Agent runtime abstraction
+- [x] Agent runtime abstraction
+- [x] OpenAI-compatible provider adapter
+- [x] SQLite / SQLAlchemy database foundation
+- [x] Session / message persistence
+- [x] Read-only SQL query endpoint
 - [ ] System prompt builder
-- [ ] Skill loader and skill registry
 - [ ] Tool registry
 - [ ] MCP client integration
-- [ ] Conversation/session storage
-- [ ] Provider adapters
 - [ ] Background job queue
-- [ ] Messaging platform integrations
+- [ ] Auth / RBAC
 - [ ] Observability and admin dashboard

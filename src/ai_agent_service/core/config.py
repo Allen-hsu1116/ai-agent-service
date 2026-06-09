@@ -17,6 +17,7 @@ class Settings(BaseModel):
     llm_base_url: str = Field(default="https://api.openai.com/v1")
     llm_model: str = Field(default="gpt-4o-mini")
     llm_temperature: float = Field(default=0.2)
+    database_url: str = Field(default="sqlite:///./data/agent.db")
     local_model_path: str | None = Field(default=None)
 
     @classmethod
@@ -27,6 +28,7 @@ class Settings(BaseModel):
             llm_base_url=os.getenv("LLM_BASE_URL", "https://api.openai.com/v1"),
             llm_model=os.getenv("LLM_MODEL", "gpt-4o-mini"),
             llm_temperature=float(os.getenv("LLM_TEMPERATURE", "0.2")),
+            database_url=os.getenv("DATABASE_URL", "sqlite:///./data/agent.db"),
             local_model_path=os.getenv("LOCAL_MODEL_PATH"),
         )
 

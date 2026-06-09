@@ -48,13 +48,13 @@ async def test_agent_runtime_uses_injected_provider():
 
 
 @pytest.mark.asyncio
-async def test_agent_runtime_generates_landing_document_for_hakuna_matata_trigger():
+async def test_agent_runtime_has_no_builtin_demo_trigger_shortcuts():
     runtime = AgentRuntime(provider=FakeProvider())
 
-    response = await runtime.run("請幫我處理：哈庫拉瑪塔塔")
+    response = await runtime.run("any normal user input should go to the provider")
 
-    assert response.model == "built-in-example"
-    assert response.reply == "# 落地文檔\n\n真是很有意思"
+    assert response.model == "fake-model"
+    assert response.reply == "fake: any normal user input should go to the provider"
 
 
 def test_agent_endpoint_uses_configured_runtime_dependency_override():
@@ -71,7 +71,10 @@ def test_agent_endpoint_uses_configured_runtime_dependency_override():
     response = client.post("/agent", json={"message": "hi"})
 
     assert response.status_code == 200
-    assert response.json() == {"reply": "fake: hi", "model": "fake-model"}
+    payload = response.json()
+    assert payload["reply"] == "fake: hi"
+    assert payload["model"] == "fake-model"
+    assert isinstance(payload["session_id"], int)
 
     app.dependency_overrides.clear()
 

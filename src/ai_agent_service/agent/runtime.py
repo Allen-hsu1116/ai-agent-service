@@ -13,9 +13,6 @@ class AgentResponse(BaseModel):
 class AgentRuntime:
     """Minimal runtime that hides the concrete LLM provider behind an interface."""
 
-    HAKUNA_MATATA_TRIGGER = "哈庫拉瑪塔塔"
-    HAKUNA_MATATA_DOCUMENT = "# 落地文檔\n\n真是很有意思"
-
     def __init__(self, provider: ModelProvider, settings: Settings | None = None):
         self.provider = provider
         self.settings = settings or Settings()
@@ -25,9 +22,6 @@ class AgentRuntime:
         return cls(provider=create_model_provider(settings), settings=settings)
 
     async def run(self, message: str) -> AgentResponse:
-        if self.HAKUNA_MATATA_TRIGGER in message:
-            return AgentResponse(reply=self.HAKUNA_MATATA_DOCUMENT, model="built-in-example")
-
         response = await self.provider.chat(
             ChatRequest(
                 messages=[ChatMessage(role="user", content=message)],

@@ -58,6 +58,7 @@ LLM_BASE_URL=https://api.openai.com/v1
 LLM_MODEL=gpt-4o-mini
 LLM_API_KEY=your_api_key_here
 LLM_TEMPERATURE=0.2
+DATABASE_URL=sqlite:///./data/agent.db
 ```
 
 如果之後要接地端 OpenAI-compatible endpoint，例如 vLLM、Ollama、LM Studio、llama.cpp server，可以改成：
@@ -106,23 +107,6 @@ curl http://127.0.0.1:8000/health
 {"status":"ok"}
 ```
 
-測試內建 deterministic 範例，不需要真實 LLM API key：
-
-```bash
-curl -X POST http://127.0.0.1:8000/agent \
-  -H 'Content-Type: application/json' \
-  -d '{"message":"哈庫拉瑪塔塔"}'
-```
-
-預期：
-
-```json
-{
-  "reply": "# 落地文檔\n\n真是很有意思",
-  "model": "built-in-example"
-}
-```
-
 測試線上 LLM API：
 
 ```bash
@@ -131,7 +115,21 @@ curl -X POST http://127.0.0.1:8000/agent \
   -d '{"message":"Say hello in Traditional Chinese"}'
 ```
 
-如果 `.env` 有正確設定 `LLM_API_KEY`，服務會呼叫指定 OpenAI-compatible API。
+如果 `.env` 有正確設定 `LLM_API_KEY`，服務會呼叫指定 OpenAI-compatible API，並把 user / assistant messages 寫入 SQLite。
+
+查詢已儲存的對話：
+
+```bash
+curl http://127.0.0.1:8000/sessions/1/messages
+```
+
+Read-only SQL 查詢：
+
+```bash
+curl -X POST http://127.0.0.1:8000/sql/query \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"SELECT id, session_id, role, content FROM messages ORDER BY id"}'
+```
 
 ## 6. Stop / Restart / Update
 
@@ -183,6 +181,23 @@ ports:
 ```bash
 curl http://127.0.0.1:8080/health
 ```
+
+### SQLite Persistence
+
+Compose 會把本機 `./data` 掛到 container 內的 `/app/data`：
+
+```yaml
+volumes:
+  - ./data:/app/data
+```
+
+預設 SQLite 檔案位置：
+
+```env
+DATABASE_URL=sqlite:///./data/agent.db
+```
+
+所以重啟 container 後，對話資料仍會保存在 Linux 主機的 `./data/agent.db`。
 
 ### Secrets
 
