@@ -110,6 +110,33 @@ The provider layer is intentionally flexible. Later, a local model can be introd
 1. Switching `LLM_BASE_URL` to a local OpenAI-compatible endpoint such as vLLM, Ollama, LM Studio, or llama.cpp server.
 2. Switching `AI_PROVIDER=local` and implementing the reserved `LocalModelProvider` adapter.
 
+### Local model example: qwen3.5-35b
+
+If your local model gateway exposes OpenAI-compatible chat completions under `http://localhost:8080/api/v1`, configure `.env` like this:
+
+```bash
+AI_PROVIDER=openai-compatible
+LLM_BASE_URL=http://localhost:8080/api/v1
+LLM_MODEL=qwen3.5-35b
+LLM_API_KEY=
+LLM_TEMPERATURE=0.2
+DATABASE_URL=sqlite:///./data/agent.db
+```
+
+Do not include the health-check path in `LLM_BASE_URL`. For example, use `http://localhost:8080/api/v1`, not `http://localhost:8080/api/v1/health`, because the service automatically sends requests to `{LLM_BASE_URL}/chat/completions`.
+
+Before testing `/agent`, confirm the local model service is running:
+
+```bash
+curl http://localhost:8080/api/v1/health
+```
+
+If the AI Agent service runs inside Docker while the model gateway runs on the host machine, use:
+
+```bash
+LLM_BASE_URL=http://host.docker.internal:8080/api/v1
+```
+
 ## Docker Deployment
 
 Linux Docker 實際部署流程請看：[`docs/docker-deployment.md`](docs/docker-deployment.md)
