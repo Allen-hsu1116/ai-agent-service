@@ -55,19 +55,19 @@ pip install -e .
 cp .env.example .env
 # 編輯 .env，填入 LLM_API_KEY
 
-uvicorn ai_agent_service.main:app --reload
+uvicorn ai_agent_service.main:app --host 0.0.0.0 --port 8020 --reload
 ```
 
 健康檢查：
 
 ```bash
-curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8020/health
 ```
 
 呼叫 Agent：
 
 ```bash
-curl -X POST http://127.0.0.1:8000/agent \
+curl -X POST http://127.0.0.1:8020/agent \
   -H 'Content-Type: application/json' \
   -d '{"message":"請用繁體中文簡短介紹 AI Agent"}'
 ```
@@ -75,13 +75,13 @@ curl -X POST http://127.0.0.1:8000/agent \
 查詢 messages：
 
 ```bash
-curl http://127.0.0.1:8000/sessions/1/messages
+curl http://127.0.0.1:8020/sessions/1/messages
 ```
 
 Read-only SQL 查詢：
 
 ```bash
-curl -X POST http://127.0.0.1:8000/sql/query \
+curl -X POST http://127.0.0.1:8020/sql/query \
   -H 'Content-Type: application/json' \
   -d '{"query":"SELECT id, role, content FROM messages ORDER BY id"}'
 ```

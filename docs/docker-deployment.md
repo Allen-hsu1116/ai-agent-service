@@ -98,7 +98,7 @@ docker compose logs -f ai-agent-service
 健康檢查：
 
 ```bash
-curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8020/health
 ```
 
 預期：
@@ -110,7 +110,7 @@ curl http://127.0.0.1:8000/health
 測試線上 LLM API：
 
 ```bash
-curl -X POST http://127.0.0.1:8000/agent \
+curl -X POST http://127.0.0.1:8020/agent \
   -H 'Content-Type: application/json' \
   -d '{"message":"Say hello in Traditional Chinese"}'
 ```
@@ -120,13 +120,13 @@ curl -X POST http://127.0.0.1:8000/agent \
 查詢已儲存的對話：
 
 ```bash
-curl http://127.0.0.1:8000/sessions/1/messages
+curl http://127.0.0.1:8020/sessions/1/messages
 ```
 
 Read-only SQL 查詢：
 
 ```bash
-curl -X POST http://127.0.0.1:8000/sql/query \
+curl -X POST http://127.0.0.1:8020/sql/query \
   -H 'Content-Type: application/json' \
   -d '{"query":"SELECT id, session_id, role, content FROM messages ORDER BY id"}'
 ```
@@ -162,18 +162,18 @@ docker image prune -f
 
 ### Container Port
 
-服務在 container 內監聽 `8000`，Compose 會映射到宿主機：
+服務在 container 內監聽 `8020`，Compose 會映射到宿主機：
 
 ```yaml
 ports:
-  - "8000:8000"
+  - "8020:8020"
 ```
 
-如果宿主機 8000 已被占用，可改成：
+如果宿主機 8020 已被占用，可改成：
 
 ```yaml
 ports:
-  - "8080:8000"
+  - "8080:8020"
 ```
 
 然後用：
@@ -208,7 +208,7 @@ DATABASE_URL=sqlite:///./data/agent.db
 Dockerfile 與 Compose 都包含 healthcheck，會定期呼叫：
 
 ```text
-http://127.0.0.1:8000/health
+http://127.0.0.1:8020/health
 ```
 
 查看健康狀態：
@@ -238,14 +238,14 @@ Production 可再接 Docker logging driver、Prometheus、OpenTelemetry 或集�
 錯誤類似：
 
 ```text
-Bind for 0.0.0.0:8000 failed: port is already allocated
+Bind for 0.0.0.0:8020 failed: port is already allocated
 ```
 
 解法：修改 `docker-compose.yml`：
 
 ```yaml
 ports:
-  - "8080:8000"
+  - "8080:8020"
 ```
 
 ### LLM API Unauthorized

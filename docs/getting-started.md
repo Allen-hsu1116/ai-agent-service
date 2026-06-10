@@ -83,25 +83,25 @@ DATABASE_URL=sqlite:///./data/agent.db
 ## 4. Start Server
 
 ```bash
-uvicorn ai_agent_service.main:app --reload
+uvicorn ai_agent_service.main:app --host 0.0.0.0 --port 8020 --reload
 ```
 
 預設服務位置：
 
 ```text
-http://127.0.0.1:8000
+http://127.0.0.1:8020
 ```
 
 Swagger UI：
 
 ```text
-http://127.0.0.1:8000/docs
+http://127.0.0.1:8020/docs
 ```
 
 ## 5. Health Check
 
 ```bash
-curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8020/health
 ```
 
 預期：
@@ -113,7 +113,7 @@ curl http://127.0.0.1:8000/health
 ## 6. Call the Agent
 
 ```bash
-curl -X POST http://127.0.0.1:8000/agent \
+curl -X POST http://127.0.0.1:8020/agent \
   -H 'Content-Type: application/json' \
   -d '{"message":"請用繁體中文簡短介紹 AI Agent"}'
 ```
@@ -135,7 +135,7 @@ curl -X POST http://127.0.0.1:8000/agent \
 第二次呼叫時帶入同一個 `session_id`：
 
 ```bash
-curl -X POST http://127.0.0.1:8000/agent \
+curl -X POST http://127.0.0.1:8020/agent \
   -H 'Content-Type: application/json' \
   -d '{"session_id":1,"message":"請再講一個實際使用場景"}'
 ```
@@ -145,7 +145,7 @@ curl -X POST http://127.0.0.1:8000/agent \
 ## 8. Query Session Messages
 
 ```bash
-curl http://127.0.0.1:8000/sessions/1/messages
+curl http://127.0.0.1:8020/sessions/1/messages
 ```
 
 回傳範例：
@@ -171,7 +171,7 @@ curl http://127.0.0.1:8000/sessions/1/messages
 可以用 `/sql/query` 查 SQLite 裡的資料。
 
 ```bash
-curl -X POST http://127.0.0.1:8000/sql/query \
+curl -X POST http://127.0.0.1:8020/sql/query \
   -H 'Content-Type: application/json' \
   -d '{"query":"SELECT id, session_id, role, content FROM messages ORDER BY id"}'
 ```
@@ -213,7 +213,7 @@ curl -X POST http://127.0.0.1:8000/sql/query \
 例如這個會被拒絕：
 
 ```bash
-curl -X POST http://127.0.0.1:8000/sql/query \
+curl -X POST http://127.0.0.1:8020/sql/query \
   -H 'Content-Type: application/json' \
   -d '{"query":"DELETE FROM messages"}'
 ```
@@ -230,7 +230,7 @@ docker compose up -d --build
 
 ```bash
 docker compose ps
-curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8020/health
 ```
 
 更多 Docker 說明：[`docs/docker-deployment.md`](docker-deployment.md)
