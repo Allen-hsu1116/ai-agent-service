@@ -141,7 +141,27 @@ LLM_BASE_URL=http://host.docker.internal:8080/api/v1
 
 Linux Docker 實際部署流程請看：[`docs/docker-deployment.md`](docs/docker-deployment.md)
 
-如果你是從 GitHub 下載整個資料夾到 server 執行，建議看：[`docs/server-deployment.md`](docs/server-deployment.md)
+如果你是從 GitHub 下載整個資料夾到 server 執行，尤其是會自己建立 Docker container 後進 container 跑指令，建議看：[`docs/server-deployment.md`](docs/server-deployment.md)
+
+Manual container 快速流程：
+
+```bash
+docker run -it \
+  --name ai-agent-service-dev \
+  -p 8020:8020 \
+  --add-host=host.docker.internal:host-gateway \
+  -v "$PWD:/workspace/ai-agent-service" \
+  -w /workspace/ai-agent-service \
+  python:3.11-slim \
+  bash
+
+apt-get update
+apt-get install -y git curl
+cp .env.server.example .env
+./scripts/run-in-container.sh
+```
+
+Docker Compose 快速流程：
 
 ```bash
 cp .env.example .env

@@ -1,6 +1,6 @@
 # Docker Deployment Guide
 
-這份文件說明如何在 Linux 環境用 Docker 啟動 AI Agent Service。
+這份文件說明如何在 Linux 環境用 Docker 啟動 AI Agent Service。若你會自己建立 container 並進 container 執行指令，優先看第 4 節；若要使用 Docker Compose，請看第 5 節。
 
 ## 1. Prerequisites
 
@@ -81,7 +81,59 @@ Linux Docker 使用 `docker-compose.yml` 內建的 `extra_hosts`，container 可
 
 `LLM_BASE_URL` 不要包含 `/health`，因為服務會自動呼叫 `{LLM_BASE_URL}/chat/completions`。
 
-## 4. Build and Start
+## 4. Manual Container Workflow
+
+如果你會自己建立 container，然後進 container 裡面執行指令，可以用這個流程。
+
+在 server 的專案根目錄建立 container：
+
+```bash
+docker run -it \
+  --name ai-agent-service-dev \
+  -p 8020:8020 \
+  --add-host=host.docker.internal:host-gateway \
+  -v "$PWD:/workspace/ai-agent-service" \
+  -w /workspace/ai-agent-service \
+  python:3.11-slim \
+  bash
+```
+
+進 container 後安裝基本工具：
+
+```bash
+apt-get update
+apt-get install -y git curl
+```
+
+建立環境檔：
+
+```bash
+cp .env.server.example .env
+```
+
+如果模型 gateway 跑在 server 主機的 `8080`，container 內建議使用：
+
+```env
+LLM_BASE_URL=http://host.docker.internal:8080/api/v1
+```
+
+啟動服務：
+
+```bash
+./scripts/run-in-container.sh
+```
+
+這個 script 會在 container 內安裝 Python package、載入 `.env`，並啟動 `uvicorn` 監聽 `0.0.0.0:8020`。
+
+從 server 主機另一個 terminal 測試：
+
+```bash
+curl http://127.0.0.1:8020/health
+```
+
+更完整的 manual container 步驟請看：[`docs/server-deployment.md`](server-deployment.md)。
+
+## 5. Docker Compose Build and Start
 
 用 Docker Compose 啟動：
 
@@ -107,7 +159,7 @@ docker compose ps
 docker compose logs -f ai-agent-service
 ```
 
-## 5. Verify Service
+## 6. Verify Service
 
 健康檢查：
 
@@ -145,7 +197,7 @@ curl -X POST http://127.0.0.1:8020/sql/query \
   -d '{"query":"SELECT id, session_id, role, content FROM messages ORDER BY id"}'
 ```
 
-## 6. Stop / Restart / Update
+## 7. Stop / Restart / Update
 
 停止：
 
@@ -172,7 +224,7 @@ docker compose up -d --build
 docker image prune -f
 ```
 
-## 7. Operational Notes
+## 8. Operational Notes
 
 ### Container Port
 
@@ -243,7 +295,7 @@ docker compose logs -f ai-agent-service
 
 Production 可再接 Docker logging driver、Prometheus、OpenTelemetry 或集中式 log 系統。
 
-## 8. Troubleshooting
+## 9. Troubleshooting
 
 ### Port already allocated
 
@@ -253,11 +305,16 @@ Production 可再接 Docker logging driver、Prometheus、OpenTelemetry 或集�
 Bind for 0.0.0.0:8020 failed: port is already allocated
 ```
 
-解法：修改 `docker-compose.yml`：
+解法：如果是 Compose，修改 `.env`：
 
-```yaml
-ports:
-  - "8080:8020"
+```env
+SERVICE_HOST_PORT=8080
+```
+
+如果是 manual container，建立 container 時改成：
+
+```bash
+-p 8080:8020
 ```
 
 ### LLM API Unauthorized
@@ -288,7 +345,7 @@ extra_hosts:
 然後設定：
 
 ```env
-LLM_BASE_URL=http://host.docker.internal:8000/v1
+LLM_BASE_URL=http://host.docker.internal:8080/api/v1
 ```
 
 ### Rebuild after dependency changes
@@ -300,7 +357,7 @@ docker compose build --no-cache
 docker compose up -d
 ```
 
-## 9. Production Checklist
+## 10. Production Checklist
 
 - [ ] `.env` 已填入正確 API key，且沒有 commit 到 GitHub
 - [ ] `docker compose ps` 顯示 service healthy
