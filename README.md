@@ -141,6 +141,8 @@ LLM_BASE_URL=http://host.docker.internal:8080/api/v1
 
 Linux Docker 實際部署流程請看：[`docs/docker-deployment.md`](docs/docker-deployment.md)
 
+如果你是從 GitHub 下載整個資料夾到 server 執行，建議看：[`docs/server-deployment.md`](docs/server-deployment.md)
+
 ```bash
 cp .env.example .env
 docker compose up -d --build

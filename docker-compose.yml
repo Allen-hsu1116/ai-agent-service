@@ -6,16 +6,18 @@ services:
     image: ai-agent-service:local
     container_name: ai-agent-service
     ports:
-      - "8020:8020"
+      - "${SERVICE_HOST_PORT:-8020}:8020"
     volumes:
-      - ./data:/app/data
+      - ${DATA_DIR:-./data}:/app/data
     env_file:
       - .env
     environment:
       AI_PROVIDER: ${AI_PROVIDER:-openai-compatible}
       LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
       LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
+      LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.2}
+      DATABASE_URL: ${DATABASE_URL:-sqlite:///./data/agent.db}
     # Useful on Linux when the container needs to call a model server running on the host.
     extra_hosts:
       - "host.docker.internal:host-gateway"

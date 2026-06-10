@@ -44,6 +44,12 @@ cd ai-agent-service
 cp .env.example .env
 ```
 
+如果你是要在 server 上接本機地端模型 `qwen3.5-35b`，可以改用 server 範例：
+
+```bash
+cp .env.server.example .env
+```
+
 編輯 `.env`：
 
 ```bash
@@ -65,13 +71,15 @@ DATABASE_URL=sqlite:///./data/agent.db
 
 ```env
 AI_PROVIDER=openai-compatible
-LLM_BASE_URL=http://host.docker.internal:8000/v1
-LLM_MODEL=your-local-model
+LLM_BASE_URL=http://host.docker.internal:8080/api/v1
+LLM_MODEL=qwen3.5-35b
 LLM_API_KEY=
 LLM_TEMPERATURE=0.2
 ```
 
 Linux Docker 使用 `docker-compose.yml` 內建的 `extra_hosts`，container 可以用 `host.docker.internal` 連到宿主機服務。若你的 Docker 版本太舊不支援 `host-gateway`，可改用宿主機 LAN IP。
+
+`LLM_BASE_URL` 不要包含 `/health`，因為服務會自動呼叫 `{LLM_BASE_URL}/chat/completions`。
 
 ## 4. Build and Start
 
@@ -79,6 +87,12 @@ Linux Docker 使用 `docker-compose.yml` 內建的 `extra_hosts`，container 可
 
 ```bash
 docker compose up -d --build
+```
+
+也可以使用 repo 內建 script，script 會自動以專案根目錄為基準建立 `.env` 與 `data/`：
+
+```bash
+./scripts/run-docker.sh
 ```
 
 查看狀態：
@@ -162,18 +176,16 @@ docker image prune -f
 
 ### Container Port
 
-服務在 container 內監聽 `8020`，Compose 會映射到宿主機：
+服務在 container 內監聽 `8020`，Compose 預設會映射到宿主機 `8020`：
 
-```yaml
-ports:
-  - "8020:8020"
+```env
+SERVICE_HOST_PORT=8020
 ```
 
-如果宿主機 8020 已被占用，可改成：
+如果宿主機 8020 已被占用，可在 `.env` 改成：
 
-```yaml
-ports:
-  - "8080:8020"
+```env
+SERVICE_HOST_PORT=8080
 ```
 
 然後用：
