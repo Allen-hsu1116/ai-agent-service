@@ -8,6 +8,7 @@
 
 ```text
 examples/skills/
+├── api-data-analysis-pipeline/SKILL.md
 ├── local-model-connection-check/SKILL.md
 ├── server-container-runbook/SKILL.md
 └── sqlite-readonly-inspection/SKILL.md
@@ -25,6 +26,7 @@ Skill 是可重複使用的操作手冊，重點是：
 
 ```text
 examples/prompts/
+├── api-data-analysis.prompt.md
 ├── base-system.prompt.md
 ├── task-router.prompt.md
 ├── skill-writer.prompt.md

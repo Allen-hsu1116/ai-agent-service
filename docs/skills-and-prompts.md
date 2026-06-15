@@ -237,10 +237,12 @@ messages = [
 examples/
 ├── README.md
 ├── skills/
+│   ├── api-data-analysis-pipeline/SKILL.md
 │   ├── local-model-connection-check/SKILL.md
 │   ├── server-container-runbook/SKILL.md
 │   └── sqlite-readonly-inspection/SKILL.md
 └── prompts/
+    ├── api-data-analysis.prompt.md
     ├── base-system.prompt.md
     ├── task-router.prompt.md
     ├── skill-writer.prompt.md
