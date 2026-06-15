@@ -172,6 +172,10 @@ docker compose up -d --build
 
 完整規劃請看：[`docs/architecture.md`](docs/architecture.md)
 
+Skills 與 prompts 管理說明請看：[`docs/skills-and-prompts.md`](docs/skills-and-prompts.md)
+
+範例資料請看：[`examples/`](examples/)
+
 ## Tests
 
 ```bash
