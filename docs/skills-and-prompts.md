@@ -92,6 +92,36 @@ examples/skills/
 
 這些範例不是 runtime 自動載入的 production skills，而是後續系統撰寫 / 驗證 skills 時可以參考的格式。
 
+### 2.2.1 漸進式 Skill 結構
+
+為了減少 token 使用量，建議優先採用 **漸進式載入**：把 `SKILL.md` 當成書的封面與目錄，只放最小必要規則；把詳細內容拆到 `references/`、`templates/`、`appendix/`，按需求載入。
+
+```text
+skills/
+└── api-data-analysis-pipeline/
+    ├── SKILL.md                         # 目錄與最小核心規則
+    ├── references/                      # 正文章節，按需求載入
+    │   ├── 01-api-retrieval.md
+    │   ├── 02-validation-cleaning.md
+    │   ├── 03-analysis-methods.md
+    │   └── 04-reporting-audit.md
+    ├── templates/                       # 輸出模板，需要時載入
+    │   ├── request-plan.json
+    │   └── analysis-report.md
+    └── appendix/                        # 附錄，低頻或深入說明才載入
+        └── statistical-notes.md
+```
+
+載入順序建議：
+
+1. 先讀 skill frontmatter 與 `SKILL.md` 目錄。
+2. 根據 user request 判斷需要哪些章節。
+3. 只載入必要 `references/`。
+4. 只有要求特定格式時才載入 `templates/`。
+5. 只有遇到特殊錯誤、深入解釋或使用者要求時才載入 `appendix/`。
+
+完整說明請看：[`docs/progressive-skills-and-prompts.md`](progressive-skills-and-prompts.md)
+
 ### 2.3 SKILL.md 建議格式
 
 ```markdown
@@ -238,12 +268,16 @@ examples/
 ├── README.md
 ├── skills/
 │   ├── api-data-analysis-pipeline/SKILL.md
+│   ├── api-data-analysis-pipeline/references/*.md
+│   ├── api-data-analysis-pipeline/templates/*
+│   ├── api-data-analysis-pipeline/appendix/*.md
 │   ├── local-model-connection-check/SKILL.md
 │   ├── server-container-runbook/SKILL.md
 │   └── sqlite-readonly-inspection/SKILL.md
 └── prompts/
     ├── api-data-analysis.prompt.md
     ├── base-system.prompt.md
+    ├── progressive-skill-loader.prompt.md
     ├── task-router.prompt.md
     ├── skill-writer.prompt.md
     └── prompt-writer.prompt.md

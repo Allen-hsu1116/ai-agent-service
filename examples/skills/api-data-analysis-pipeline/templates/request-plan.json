@@ -1,0 +1,19 @@
+{
+  "endpoint": "${API_ENDPOINT}",
+  "method": "GET",
+  "base_url": "${API_BASE_URL}",
+  "params": {
+    "start_date": "${START_DATE}",
+    "end_date": "${END_DATE}",
+    "page_size": 500
+  },
+  "pagination": {
+    "type": "${PAGINATION_TYPE}",
+    "cursor_field": "${CURSOR_FIELD}",
+    "max_pages": 100
+  },
+  "timeout_seconds": 30,
+  "max_retries": 3,
+  "expected_schema": "${EXPECTED_SCHEMA}",
+  "notes": "Do not include API keys, bearer tokens, cookies, or signed URLs in this plan."
+}

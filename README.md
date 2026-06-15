@@ -174,6 +174,8 @@ docker compose up -d --build
 
 Skills 與 prompts 管理說明請看：[`docs/skills-and-prompts.md`](docs/skills-and-prompts.md)
 
+漸進式 skills / prompts 載入策略請看：[`docs/progressive-skills-and-prompts.md`](docs/progressive-skills-and-prompts.md)
+
 範例資料請看：[`examples/`](examples/)
 
 ## Tests

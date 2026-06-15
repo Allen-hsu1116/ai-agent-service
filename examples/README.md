@@ -8,7 +8,11 @@
 
 ```text
 examples/skills/
-├── api-data-analysis-pipeline/SKILL.md
+├── api-data-analysis-pipeline/
+│   ├── SKILL.md
+│   ├── references/
+│   ├── templates/
+│   └── appendix/
 ├── local-model-connection-check/SKILL.md
 ├── server-container-runbook/SKILL.md
 └── sqlite-readonly-inspection/SKILL.md
@@ -28,6 +32,7 @@ Skill 是可重複使用的操作手冊，重點是：
 examples/prompts/
 ├── api-data-analysis.prompt.md
 ├── base-system.prompt.md
+├── progressive-skill-loader.prompt.md
 ├── task-router.prompt.md
 ├── skill-writer.prompt.md
 └── prompt-writer.prompt.md
@@ -46,3 +51,4 @@ Prompt 是模型輸入模板，重點是：
 - 不要把 `.env`、API key、密碼放進 examples。
 - 範例可以包含 placeholder，例如 `${PROJECT_ROOT}`、`${LLM_BASE_URL}`。
 - 範例應該可被 validator 檢查，不要只寫散文。
+- 複雜 skill 優先採用漸進式結構：`SKILL.md` 當目錄，`references/` 放正文，`templates/` 放輸出模板，`appendix/` 放低頻深入內容。
