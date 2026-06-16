@@ -44,19 +44,61 @@ ai-agent-service/
 
 完整流程請看：[`docs/getting-started.md`](docs/getting-started.md)
 
+### Server / manual Docker container 快速流程
+
+如果你會自己建立 Docker container，建議用這段。先在 server 主機下載 repo：
+
+```bash
+git clone https://github.com/Allen-hsu1116/ai-agent-service.git
+cd ai-agent-service
+```
+
+在 server 主機建立並進入 container：
+
+```bash
+docker run -it \
+  --name ai-agent-service-dev \
+  -p 8020:8020 \
+  --add-host=host.docker.internal:host-gateway \
+  -v "$PWD:/workspace/ai-agent-service" \
+  -w /workspace/ai-agent-service \
+  python:3.11-slim \
+  bash
+```
+
+進入 container 後執行：
+
+```bash
+apt-get update
+apt-get install -y git curl
+cp .env.server.example .env
+./scripts/run-in-container.sh
+```
+
+如果你的模型 gateway 跑在 server 主機的 `8080`，`.env.server.example` 已預設：
+
+```env
+LLM_BASE_URL=http://host.docker.internal:8080/api/v1
+```
+
+不要把 `/health` 放進 `LLM_BASE_URL`。
+
+### Native Python 快速流程
+
+如果你不用 Docker，直接在主機跑 Python：
+
 ```bash
 git clone https://github.com/Allen-hsu1116/ai-agent-service.git
 cd ai-agent-service
 
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
+cp .env.server.example .env
+# 如果 AI Agent Service 和模型 gateway 都直接跑在主機上，把 .env 裡的 LLM_BASE_URL 改成：
+# LLM_BASE_URL=http://localhost:8080/api/v1
 
-cp .env.example .env
-# 編輯 .env，填入 LLM_API_KEY
-
-uvicorn ai_agent_service.main:app --host 0.0.0.0 --port 8020 --reload
+./scripts/run-local.sh
 ```
+
+`scripts/run-local.sh` 會自動建立 `.venv`、安裝套件、載入 `.env`，再啟動服務。
 
 健康檢查：
 
@@ -145,6 +187,8 @@ Linux Docker 實際部署流程請看：[`docs/docker-deployment.md`](docs/docke
 
 Manual container 快速流程：
 
+Host 上先建立 container：
+
 ```bash
 docker run -it \
   --name ai-agent-service-dev \
@@ -154,7 +198,11 @@ docker run -it \
   -w /workspace/ai-agent-service \
   python:3.11-slim \
   bash
+```
 
+Container 內再執行：
+
+```bash
 apt-get update
 apt-get install -y git curl
 cp .env.server.example .env

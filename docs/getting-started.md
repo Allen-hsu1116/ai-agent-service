@@ -82,7 +82,18 @@ DATABASE_URL=sqlite:///./data/agent.db
 
 ## 4. Start Server
 
+建議使用內建 script 啟動，因為它會自動載入 `.env`：
+
 ```bash
+./scripts/run-local.sh
+```
+
+如果你要手動啟動，請先把 `.env` 載入 shell，否則 Python process 讀不到環境變數：
+
+```bash
+set -a
+source .env
+set +a
 uvicorn ai_agent_service.main:app --host 0.0.0.0 --port 8020 --reload
 ```
 
@@ -219,6 +230,34 @@ curl -X POST http://127.0.0.1:8020/sql/query \
 ```
 
 ## 10. Docker Start
+
+如果你會自己建立 Docker container 並進 container 執行指令，請優先看：[`docs/server-deployment.md`](server-deployment.md)
+
+簡短流程。
+
+Host 上先建立 container：
+
+```bash
+docker run -it \
+  --name ai-agent-service-dev \
+  -p 8020:8020 \
+  --add-host=host.docker.internal:host-gateway \
+  -v "$PWD:/workspace/ai-agent-service" \
+  -w /workspace/ai-agent-service \
+  python:3.11-slim \
+  bash
+```
+
+Container 內再執行：
+
+```bash
+apt-get update
+apt-get install -y git curl
+cp .env.server.example .env
+./scripts/run-in-container.sh
+```
+
+如果使用 Docker Compose：
 
 ```bash
 cp .env.example .env
