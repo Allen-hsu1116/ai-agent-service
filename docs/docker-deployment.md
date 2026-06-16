@@ -120,7 +120,7 @@ LLM_BASE_URL=http://host.docker.internal:8080/api/v1
 啟動服務：
 
 ```bash
-./scripts/run-in-container.sh
+bash scripts/run-in-container.sh
 ```
 
 這個 script 會在 container 內安裝 Python package、載入 `.env`，並啟動 `uvicorn` 監聽 `0.0.0.0:8020`。
@@ -144,7 +144,7 @@ docker compose up -d --build
 也可以使用 repo 內建 script，script 會自動以專案根目錄為基準建立 `.env` 與 `data/`：
 
 ```bash
-./scripts/run-docker.sh
+bash scripts/run-docker.sh
 ```
 
 查看狀態：

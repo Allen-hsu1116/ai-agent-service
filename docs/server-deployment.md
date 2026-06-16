@@ -170,7 +170,7 @@ LLM_BASE_URL=http://localhost:8080/api/v1
 ### 4.4 啟動服務
 
 ```bash
-./scripts/run-in-container.sh
+bash scripts/run-in-container.sh
 ```
 
 這個 script 會：
@@ -289,7 +289,7 @@ exit
 docker start ai-agent-service-dev
 docker exec -it ai-agent-service-dev bash
 cd /workspace/ai-agent-service
-./scripts/run-in-container.sh
+bash scripts/run-in-container.sh
 ```
 
 ### 4.8 長期背景執行方式
@@ -297,7 +297,7 @@ cd /workspace/ai-agent-service
 如果你要讓服務在 container 裡背景常駐，可以用 `nohup` 或 `tmux`。例如：
 
 ```bash
-nohup ./scripts/run-in-container.sh > app.log 2>&1 &
+nohup bash scripts/run-in-container.sh > app.log 2>&1 &
 ```
 
 查看 log：
@@ -316,7 +316,7 @@ docker run -d \
   -v "$PWD:/workspace/ai-agent-service" \
   -w /workspace/ai-agent-service \
   python:3.11-slim \
-  bash -lc "apt-get update && apt-get install -y git curl && ./scripts/run-in-container.sh"
+  bash -lc "apt-get update && apt-get install -y git curl && bash scripts/run-in-container.sh"
 ```
 
 查看 log：
@@ -330,7 +330,7 @@ docker logs -f ai-agent-service
 如果之後你想改用 repo 內建 compose：
 
 ```bash
-./scripts/run-docker.sh
+bash scripts/run-docker.sh
 ```
 
 或手動：
@@ -384,7 +384,7 @@ LLM_BASE_URL=http://localhost:8080/api/v1
 啟動：
 
 ```bash
-./scripts/run-local.sh
+bash scripts/run-local.sh
 ```
 
 這個 script 會：
@@ -452,7 +452,7 @@ DATA_DIR=./data
 git pull
 docker exec -it ai-agent-service-dev bash
 cd /workspace/ai-agent-service
-./scripts/run-in-container.sh
+bash scripts/run-in-container.sh
 ```
 
 如果是 Git clone，而且使用 Docker Compose：

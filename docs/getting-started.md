@@ -86,7 +86,7 @@ DATABASE_URL=sqlite:///./data/agent.db
 建議使用內建 script 啟動，因為它會自動載入 `.env`：
 
 ```bash
-./scripts/run-local.sh
+bash scripts/run-local.sh
 ```
 
 如果你要手動啟動，請先把 `.env` 載入 shell，否則 Python process 讀不到環境變數：
@@ -315,10 +315,12 @@ cp .env.server.example .env
 # - 連同 network 的模型 container: http://model-gateway:8080/api/v1
 # - host network: http://localhost:8080/api/v1
 
-./scripts/run-in-container.sh
+bash scripts/run-in-container.sh
 ```
 
 如果你的 container 已經有 repo，直接 `cd` 到專案根目錄後從 `cp .env.server.example .env` 開始。
+
+> 若你執行 `.sh` 遇到 `Permission denied`，請改用 `bash scripts/run-in-container.sh`，或先執行 `chmod +x scripts/run-in-container.sh` 後再用 `./scripts/run-in-container.sh`。
 
 如果你還沒建立 container，可以參考：
 

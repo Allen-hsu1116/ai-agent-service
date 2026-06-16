@@ -46,7 +46,7 @@ docker run -it \
 apt-get update
 apt-get install -y git curl
 cp .env.server.example .env
-./scripts/run-in-container.sh
+bash scripts/run-in-container.sh
 ```
 
 ## Important Environment Values
@@ -81,7 +81,7 @@ Then SQLite data stays on the host at:
 ## Start Service
 
 ```bash
-./scripts/run-in-container.sh
+bash scripts/run-in-container.sh
 ```
 
 Manual equivalent:
@@ -114,13 +114,13 @@ curl -X POST http://127.0.0.1:8020/agent \
 docker start ai-agent-service-dev
 docker exec -it ai-agent-service-dev bash
 cd /workspace/ai-agent-service
-./scripts/run-in-container.sh
+bash scripts/run-in-container.sh
 ```
 
 ## Background Run Option
 
 ```bash
-nohup ./scripts/run-in-container.sh > app.log 2>&1 &
+nohup bash scripts/run-in-container.sh > app.log 2>&1 &
 tail -f app.log
 ```
 

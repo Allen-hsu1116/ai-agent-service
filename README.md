@@ -123,10 +123,12 @@ LLM_BASE_URL=http://localhost:8080/api/v1
 啟動服務：
 
 ```bash
-./scripts/run-in-container.sh
+bash scripts/run-in-container.sh
 ```
 
 這個 script 會自動安裝 Python package、載入 `.env`，並啟動 `uvicorn`。
+
+> 為了避免 `Permission denied`，Quick Start 預設用 `bash scripts/run-in-container.sh`，不要求 `.sh` 檔有 executable bit。如果你想用 `./scripts/run-in-container.sh`，請先執行 `chmod +x scripts/run-in-container.sh`。
 
 > 注意：如果你希望從 server 主機用 `http://127.0.0.1:8020` 存取服務，你建立 container 時需要有 port mapping，例如 `-p 8020:8020`。如果當初沒有映射 port，可以在 container 內測 `curl http://127.0.0.1:8020/health`，或重新建立 container 加上 port mapping。
 
@@ -154,7 +156,7 @@ docker run -it \
 apt-get update
 apt-get install -y git curl
 cp .env.server.example .env
-./scripts/run-in-container.sh
+bash scripts/run-in-container.sh
 ```
 
 ### Native Python 快速流程
@@ -169,7 +171,7 @@ cp .env.server.example .env
 # 如果 AI Agent Service 和模型 gateway 都直接跑在主機上，把 .env 裡的 LLM_BASE_URL 改成：
 # LLM_BASE_URL=http://localhost:8080/api/v1
 
-./scripts/run-local.sh
+bash scripts/run-local.sh
 ```
 
 `scripts/run-local.sh` 會自動建立 `.venv`、安裝套件、載入 `.env`，再啟動服務。
@@ -326,7 +328,7 @@ cd /workspace
 git clone https://github.com/Allen-hsu1116/ai-agent-service.git
 cd ai-agent-service
 cp .env.server.example .env
-./scripts/run-in-container.sh
+bash scripts/run-in-container.sh
 ```
 
 如果你還沒建立 container，請看 [`docs/server-deployment.md`](docs/server-deployment.md)。
