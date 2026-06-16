@@ -88,11 +88,116 @@ LLM_BASE_URL=http://host.docker.internal:8080/api/v1/health
 {LLM_BASE_URL}/chat/completions
 ```
 
-## 4. Manual Docker Container Run
+## 4. Existing Manual Docker Container Run
 
-這一節適合你自己建立 container，然後進 container 裡執行安裝與啟動指令。
+這一節適合你已經自己建立好 container，想在自己的 container 環境裡執行服務。
 
-### 4.1 建立 container 時要注意的參數
+### 4.1 進入既有 container
+
+在 server 主機執行：
+
+```bash
+docker exec -it ai-agent-service-dev bash
+```
+
+如果 container 還沒啟動：
+
+```bash
+docker start ai-agent-service-dev
+docker exec -it ai-agent-service-dev bash
+```
+
+進入 container 後確認 Python：
+
+```bash
+python3 --version || python --version
+```
+
+建議 Python 版本是 `3.11+`。
+
+### 4.2 在 container 內取得專案
+
+如果你的 container 還沒有 repo：
+
+```bash
+mkdir -p /workspace
+cd /workspace
+git clone https://github.com/Allen-hsu1116/ai-agent-service.git
+cd ai-agent-service
+```
+
+如果你的 container 已經有 repo，直接切到專案根目錄，例如：
+
+```bash
+cd /workspace/ai-agent-service
+```
+
+如果 container 沒有 `git`，可以先安裝，或把 repo 從 server 主機掛載 / 複製進 container：
+
+```bash
+apt-get update
+apt-get install -y git curl
+```
+
+### 4.3 建立 `.env`
+
+```bash
+cp .env.server.example .env
+```
+
+依你的 container 網路調整 `LLM_BASE_URL`：
+
+模型 gateway 跑在 server 主機，且 container 能解析 `host.docker.internal`：
+
+```env
+LLM_BASE_URL=http://host.docker.internal:8080/api/v1
+```
+
+模型 gateway 是另一個 Docker container，且在同一個 Docker network：
+
+```env
+LLM_BASE_URL=http://model-gateway:8080/api/v1
+```
+
+目前 container 使用 `--network host`：
+
+```env
+LLM_BASE_URL=http://localhost:8080/api/v1
+```
+
+不要把 `/health` 放進 `LLM_BASE_URL`。
+
+### 4.4 啟動服務
+
+```bash
+./scripts/run-in-container.sh
+```
+
+這個 script 會：
+
+1. 自動切到專案根目錄。
+2. 如果沒有 `.env`，從 `.env.server.example` 建立。
+3. 建立 `data/`。
+4. 自動選擇 `python3` 或 `python`。
+5. 在 container 的 Python 環境安裝套件。
+6. 載入 `.env`。
+7. 啟動 `uvicorn`，監聽 `0.0.0.0:8020`。
+
+如果你想手動執行，等同於：
+
+```bash
+mkdir -p data
+python3 -m pip install --upgrade pip || python -m pip install --upgrade pip
+python3 -m pip install -e . || python -m pip install -e .
+set -a
+source .env
+set +a
+python3 -m uvicorn ai_agent_service.main:app --host 0.0.0.0 --port 8020 || python -m uvicorn ai_agent_service.main:app --host 0.0.0.0 --port 8020
+```
+
+> 如果你希望從 server 主機用 `http://127.0.0.1:8020` 存取服務，container 建立時需要 port mapping，例如 `-p 8020:8020`。如果沒有 port mapping，可以先在 container 內測 `curl http://127.0.0.1:8020/health`，或重新建立 container 加上 port mapping。
+
+### 4.5 如果你還沒建立 container
 
 假設你的模型 gateway 跑在 server 主機的 `8080`，AI Agent Service 跑在你自己建立的 container 裡，建議建立 container 時加上：
 
@@ -140,83 +245,15 @@ LLM_BASE_URL=http://localhost:8080/api/v1
 
 因為 container 會和宿主機共用 network namespace。不過 host network 在不同環境限制較多，預設仍建議用 `--add-host`。
 
-### 4.2 在 container 裡安裝基本工具
-
-如果你用 `python:3.11-slim`，進 container 後先安裝常用工具：
-
-```bash
-apt-get update
-apt-get install -y git curl
-```
-
-如果你已經把 repo 掛進 container，確認檔案存在：
-
-```bash
-pwd
-ls
-```
-
-如果你沒有掛 volume，而是想在 container 裡 clone：
-
-```bash
-git clone https://github.com/Allen-hsu1116/ai-agent-service.git
-cd ai-agent-service
-```
-
-### 4.3 建立 `.env`
-
-在 container 的專案根目錄執行：
-
-```bash
-cp .env.server.example .env
-```
-
-如果模型 gateway 跑在 server 主機，且 container 是用 `--add-host=host.docker.internal:host-gateway` 建立，保留：
-
-```env
-LLM_BASE_URL=http://host.docker.internal:8080/api/v1
-```
-
-如果 container 是用 `--network host` 建立，改成：
-
-```env
-LLM_BASE_URL=http://localhost:8080/api/v1
-```
-
-不要把 `/health` 放進 `LLM_BASE_URL`。
-
-### 4.4 在 container 裡啟動服務
-
-最簡單使用內建 script：
-
-```bash
-./scripts/run-in-container.sh
-```
-
-這個 script 會：
-
-1. 自動切到專案根目錄。
-2. 如果沒有 `.env`，從 `.env.server.example` 建立。
-3. 建立 `data/`。
-4. 在 container 的 Python 環境安裝套件。
-5. 載入 `.env`。
-6. 啟動 `uvicorn`，監聽 `0.0.0.0:8020`。
-
-如果你想手動執行，等同於：
-
-```bash
-mkdir -p data
-python -m pip install --upgrade pip
-python -m pip install -e .
-set -a
-source .env
-set +a
-python -m uvicorn ai_agent_service.main:app --host 0.0.0.0 --port 8020
-```
-
-### 4.5 從另一個 terminal 測試
+### 4.6 從另一個 terminal 測試
 
 服務啟動後，在 server 主機另一個 terminal 測：
+
+```bash
+curl http://127.0.0.1:8020/health
+```
+
+如果當初沒有 port mapping，請在 container 裡測：
 
 ```bash
 curl http://127.0.0.1:8020/health
@@ -236,7 +273,7 @@ curl -X POST http://127.0.0.1:8020/agent \
   -d '{"message":"請用繁體中文簡短回答：模型連線測試"}'
 ```
 
-### 4.6 停止與重新進入 container
+### 4.7 停止與重新進入 container
 
 如果服務在前景執行，按 `Ctrl+C` 停止。
 
@@ -255,7 +292,7 @@ cd /workspace/ai-agent-service
 ./scripts/run-in-container.sh
 ```
 
-### 4.7 長期背景執行方式
+### 4.8 長期背景執行方式
 
 如果你要讓服務在 container 裡背景常駐，可以用 `nohup` 或 `tmux`。例如：
 

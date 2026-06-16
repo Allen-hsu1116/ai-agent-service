@@ -231,11 +231,43 @@ curl -X POST http://127.0.0.1:8020/sql/query \
 
 ## 10. Docker Start
 
-如果你會自己建立 Docker container 並進 container 執行指令，請優先看：[`docs/server-deployment.md`](server-deployment.md)
+如果你已經自己建立好 Docker container，請優先用這個流程。更多細節請看：[`docs/server-deployment.md`](server-deployment.md)
 
-簡短流程。
+Host 上進入既有 container：
 
-Host 上先建立 container：
+```bash
+docker exec -it ai-agent-service-dev bash
+```
+
+如果 container 還沒啟動：
+
+```bash
+docker start ai-agent-service-dev
+docker exec -it ai-agent-service-dev bash
+```
+
+Container 內取得專案並啟動：
+
+```bash
+mkdir -p /workspace
+cd /workspace
+
+# 如果還沒有下載 repo
+git clone https://github.com/Allen-hsu1116/ai-agent-service.git
+cd ai-agent-service
+
+cp .env.server.example .env
+# 依你的 container 網路調整 LLM_BASE_URL：
+# - 連 server 主機模型 gateway: http://host.docker.internal:8080/api/v1
+# - 連同 network 的模型 container: http://model-gateway:8080/api/v1
+# - host network: http://localhost:8080/api/v1
+
+./scripts/run-in-container.sh
+```
+
+如果你的 container 已經有 repo，直接 `cd` 到專案根目錄後從 `cp .env.server.example .env` 開始。
+
+如果你還沒建立 container，可以參考：
 
 ```bash
 docker run -it \
@@ -246,15 +278,6 @@ docker run -it \
   -w /workspace/ai-agent-service \
   python:3.11-slim \
   bash
-```
-
-Container 內再執行：
-
-```bash
-apt-get update
-apt-get install -y git curl
-cp .env.server.example .env
-./scripts/run-in-container.sh
 ```
 
 如果使用 Docker Compose：
@@ -268,7 +291,12 @@ docker compose up -d --build
 確認：
 
 ```bash
-docker compose ps
+curl http://127.0.0.1:8020/health
+```
+
+如果當初 container 沒有 `-p 8020:8020`，host 可能連不到 `127.0.0.1:8020`，請在 container 內測：
+
+```bash
 curl http://127.0.0.1:8020/health
 ```
 

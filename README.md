@@ -44,18 +44,95 @@ ai-agent-service/
 
 完整流程請看：[`docs/getting-started.md`](docs/getting-started.md)
 
-### Server / manual Docker container 快速流程
+### 已有 Docker container 的快速流程
 
-如果你會自己建立 Docker container，建議用這段。先在 server 主機下載 repo：
+如果你已經自己建好 container，請用這段。假設你的 container 名稱是 `ai-agent-service-dev`，先從 server 主機進入 container：
 
 ```bash
+docker exec -it ai-agent-service-dev bash
+```
+
+如果 container 還沒啟動，先執行：
+
+```bash
+docker start ai-agent-service-dev
+docker exec -it ai-agent-service-dev bash
+```
+
+進入 container 後，確認 Python 版本：
+
+```bash
+python3 --version || python --version
+```
+
+建議 Python 版本是 `3.11+`。如果 container 裡沒有 `git` 或 `curl`，先安裝：
+
+```bash
+apt-get update
+apt-get install -y git curl
+```
+
+接著在 container 內取得專案：
+
+```bash
+mkdir -p /workspace
+cd /workspace
+
+# 如果還沒有下載 repo
 git clone https://github.com/Allen-hsu1116/ai-agent-service.git
 cd ai-agent-service
 ```
 
-在 server 主機建立並進入 container：
+如果你的 container 已經有專案資料夾，直接切到該資料夾即可，例如：
 
 ```bash
+cd /workspace/ai-agent-service
+```
+
+建立環境檔：
+
+```bash
+cp .env.server.example .env
+```
+
+如果你的模型 gateway 跑在 server 主機的 `8080`，而 container 可以連 `host.docker.internal`，保留：
+
+```env
+LLM_BASE_URL=http://host.docker.internal:8080/api/v1
+```
+
+如果你的模型 gateway 是另一個 Docker container，且兩個 container 在同一個 Docker network，請改成模型 container 名稱，例如：
+
+```env
+LLM_BASE_URL=http://model-gateway:8080/api/v1
+```
+
+如果你的 container 使用 `--network host`，請改成：
+
+```env
+LLM_BASE_URL=http://localhost:8080/api/v1
+```
+
+不要把 `/health` 放進 `LLM_BASE_URL`。
+
+啟動服務：
+
+```bash
+./scripts/run-in-container.sh
+```
+
+這個 script 會自動安裝 Python package、載入 `.env`，並啟動 `uvicorn`。
+
+> 注意：如果你希望從 server 主機用 `http://127.0.0.1:8020` 存取服務，你建立 container 時需要有 port mapping，例如 `-p 8020:8020`。如果當初沒有映射 port，可以在 container 內測 `curl http://127.0.0.1:8020/health`，或重新建立 container 加上 port mapping。
+
+### 從零建立 Docker container 的參考流程
+
+如果你還沒建立 container，可以在 server 主機使用：
+
+```bash
+git clone https://github.com/Allen-hsu1116/ai-agent-service.git
+cd ai-agent-service
+
 docker run -it \
   --name ai-agent-service-dev \
   -p 8020:8020 \
@@ -66,7 +143,7 @@ docker run -it \
   bash
 ```
 
-進入 container 後執行：
+進 container 後：
 
 ```bash
 apt-get update
@@ -74,14 +151,6 @@ apt-get install -y git curl
 cp .env.server.example .env
 ./scripts/run-in-container.sh
 ```
-
-如果你的模型 gateway 跑在 server 主機的 `8080`，`.env.server.example` 已預設：
-
-```env
-LLM_BASE_URL=http://host.docker.internal:8080/api/v1
-```
-
-不要把 `/health` 放進 `LLM_BASE_URL`。
 
 ### Native Python 快速流程
 
@@ -187,27 +256,25 @@ Linux Docker 實際部署流程請看：[`docs/docker-deployment.md`](docs/docke
 
 Manual container 快速流程：
 
-Host 上先建立 container：
+如果你已經有 container，先進入 container：
 
 ```bash
-docker run -it \
-  --name ai-agent-service-dev \
-  -p 8020:8020 \
-  --add-host=host.docker.internal:host-gateway \
-  -v "$PWD:/workspace/ai-agent-service" \
-  -w /workspace/ai-agent-service \
-  python:3.11-slim \
-  bash
+docker exec -it ai-agent-service-dev bash
 ```
 
-Container 內再執行：
+Container 內執行：
 
 ```bash
-apt-get update
-apt-get install -y git curl
+mkdir -p /workspace
+cd /workspace
+# 如果還沒有 repo 才需要 clone
+git clone https://github.com/Allen-hsu1116/ai-agent-service.git
+cd ai-agent-service
 cp .env.server.example .env
 ./scripts/run-in-container.sh
 ```
+
+如果你還沒建立 container，請看 [`docs/server-deployment.md`](docs/server-deployment.md)。
 
 Docker Compose 快速流程：
 
