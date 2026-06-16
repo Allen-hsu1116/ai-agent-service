@@ -79,6 +79,7 @@ DATABASE_URL=sqlite:///./data/agent.db
 - `sessions`
 - `messages`
 - `agent_runs`
+- `tool_calls`
 
 ## 4. Start Server
 
@@ -229,7 +230,59 @@ curl -X POST http://127.0.0.1:8020/sql/query \
   -d '{"query":"DELETE FROM messages"}'
 ```
 
-## 10. Docker Start
+## 10. Phase 2 Tool Registry Demo
+
+這個版本已經有基礎 Tool Registry / Tool Executor。範例 tool 是 `jimmy_visit_document`：它會讀取一份 UTF-8 文字文件，並寫出一份加上 `Jimmy 到此一遊` 的新文件。
+
+查詢可用 tools：
+
+```bash
+curl http://127.0.0.1:8020/tools
+```
+
+建立測試文件：
+
+```bash
+mkdir -p examples/runtime
+printf '這是一份測試文件。\n' > examples/runtime/source.txt
+```
+
+執行 tool：
+
+```bash
+curl -X POST http://127.0.0.1:8020/tools/jimmy_visit_document/run \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "arguments": {
+      "input_path": "examples/runtime/source.txt",
+      "output_path": "examples/runtime/visited.txt"
+    }
+  }'
+```
+
+檢查輸出：
+
+```bash
+cat examples/runtime/visited.txt
+```
+
+預期：
+
+```text
+這是一份測試文件。
+
+Jimmy 到此一遊
+```
+
+檢查 tool call log：
+
+```bash
+curl -X POST http://127.0.0.1:8020/sql/query \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"SELECT tool_name, status, side_effect FROM tool_calls ORDER BY id"}'
+```
+
+## 11. Docker Start
 
 如果你已經自己建立好 Docker container，請優先用這個流程。更多細節請看：[`docs/server-deployment.md`](server-deployment.md)
 
@@ -302,14 +355,14 @@ curl http://127.0.0.1:8020/health
 
 更多 Docker 說明：[`docs/docker-deployment.md`](docker-deployment.md)
 
-## 11. Run Tests
+## 12. Run Tests
 
 ```bash
 PYTHONPATH=src python -m pytest -q
 PYTHONPATH=src python -m ruff check .
 ```
 
-## 12. Current Scope
+## 13. Current Scope
 
 這個版本刻意先把範例功能拿掉，專注在可以實際使用的基礎功能：
 
@@ -317,13 +370,17 @@ PYTHONPATH=src python -m ruff check .
 - SQLite / SQLAlchemy
 - 對話儲存
 - read-only SQL 查詢
+- Tool Registry / Tool Executor
+- `jimmy_visit_document` 文件寫入範例 tool
+- `tool_calls` 執行紀錄
 - Docker 啟動
 
 後續再逐步加入：
 
 - PromptBuilder
 - conversation history injection
-- tool calling
+- tool-calling agent loop
+- SkillLoader / progressive skill runtime
 - MCP
 - auth / RBAC
 - background jobs

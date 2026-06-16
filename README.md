@@ -12,6 +12,10 @@
 - session / message / agent run 儲存
 - `/sessions/{session_id}/messages` 查詢對話紀錄
 - `/sql/query` read-only SQL 查詢
+- Tool Registry / Tool Executor 基礎版
+- `/tools` 查詢可用工具
+- `/tools/{tool_name}/run` 執行受控工具並寫入 `tool_calls` log
+- 範例工具：讀取文件後輸出包含 `Jimmy 到此一遊` 的新文件
 - Docker / Docker Compose 啟動
 
 ## 專案結構
@@ -24,6 +28,7 @@ ai-agent-service/
 │   ├── core/               # Settings / config
 │   ├── db/                 # SQLAlchemy models, session, repository
 │   ├── providers/          # LLM provider abstraction
+│   ├── tools/              # Tool Registry / Executor / demo tools
 │   ├── __init__.py
 │   └── main.py             # FastAPI app and routes
 ├── docs/
@@ -197,6 +202,56 @@ curl -X POST http://127.0.0.1:8020/sql/query \
   -d '{"query":"SELECT id, role, content FROM messages ORDER BY id"}'
 ```
 
+### Phase 2 Tool Registry 範例：Jimmy 到此一遊
+
+先查詢目前註冊的 tools：
+
+```bash
+curl http://127.0.0.1:8020/tools
+```
+
+建立一份測試文件：
+
+```bash
+mkdir -p examples/runtime
+printf '這是一份測試文件。\n' > examples/runtime/source.txt
+```
+
+執行範例 tool，讀取 `source.txt` 並寫出 `visited.txt`：
+
+```bash
+curl -X POST http://127.0.0.1:8020/tools/jimmy_visit_document/run \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "arguments": {
+      "input_path": "examples/runtime/source.txt",
+      "output_path": "examples/runtime/visited.txt"
+    }
+  }'
+```
+
+檢查輸出文件：
+
+```bash
+cat examples/runtime/visited.txt
+```
+
+預期會看到：
+
+```text
+這是一份測試文件。
+
+Jimmy 到此一遊
+```
+
+檢查 tool execution log：
+
+```bash
+curl -X POST http://127.0.0.1:8020/sql/query \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"SELECT tool_name, status, side_effect FROM tool_calls ORDER BY id"}'
+```
+
 ## Environment Variables
 
 Copy `.env.example` to `.env` and fill in your provider key.
@@ -307,8 +362,11 @@ PYTHONPATH=src python -m ruff check .
 - [x] SQLite / SQLAlchemy database foundation
 - [x] Session / message persistence
 - [x] Read-only SQL query endpoint
+- [x] Phase 2 Tool Registry / Tool Executor foundation
+- [x] Demo write-capable document tool with `tool_calls` audit log
 - [ ] System prompt builder
-- [ ] Tool registry
+- [ ] Skill loader / progressive skill runtime
+- [ ] Tool-calling agent loop
 - [ ] MCP client integration
 - [ ] Background job queue
 - [ ] Auth / RBAC

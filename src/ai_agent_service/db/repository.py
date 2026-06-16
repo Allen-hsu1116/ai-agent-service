@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session as SQLAlchemySession
 
-from ai_agent_service.db.models import AgentRun, Message, Session
+from ai_agent_service.db.models import AgentRun, Message, Session, ToolCall
 
 
 def get_or_create_session(db: SQLAlchemySession, session_id: int | None = None) -> Session:
@@ -49,3 +49,26 @@ def list_messages(db: SQLAlchemySession, session_id: int) -> list[Message]:
     return list(
         db.scalars(select(Message).where(Message.session_id == session_id).order_by(Message.id))
     )
+
+
+def add_tool_call(
+    db: SQLAlchemySession,
+    *,
+    tool_name: str,
+    status: str,
+    side_effect: str,
+    arguments_json: str,
+    result_json: str | None = None,
+    error_message: str | None = None,
+) -> ToolCall:
+    tool_call = ToolCall(
+        tool_name=tool_name,
+        status=status,
+        side_effect=side_effect,
+        arguments_json=arguments_json,
+        result_json=result_json,
+        error_message=error_message,
+    )
+    db.add(tool_call)
+    db.flush()
+    return tool_call
