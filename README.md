@@ -346,6 +346,8 @@ docker compose up -d --build
 
 Skills 與 prompts 管理說明請看：[`docs/skills-and-prompts.md`](docs/skills-and-prompts.md)
 
+LLM 連線 404 / `LLM_BASE_URL` 疑難排解請看：[`docs/troubleshooting-llm-404.md`](docs/troubleshooting-llm-404.md)
+
 漸進式 skills / prompts 載入策略請看：[`docs/progressive-skills-and-prompts.md`](docs/progressive-skills-and-prompts.md)
 
 範例資料請看：[`examples/`](examples/)
