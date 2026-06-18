@@ -348,6 +348,8 @@ Skills 與 prompts 管理說明請看：[`docs/skills-and-prompts.md`](docs/skil
 
 LLM 連線 404 / `LLM_BASE_URL` 疑難排解請看：[`docs/troubleshooting-llm-404.md`](docs/troubleshooting-llm-404.md)
 
+Harness Engineering 課程參考筆記請看：[`docs/harness-engineering-reference.md`](docs/harness-engineering-reference.md)
+
 漸進式 skills / prompts 載入策略請看：[`docs/progressive-skills-and-prompts.md`](docs/progressive-skills-and-prompts.md)
 
 範例資料請看：[`examples/`](examples/)
