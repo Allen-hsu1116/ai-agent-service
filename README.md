@@ -350,6 +350,8 @@ LLM 連線 404 / `LLM_BASE_URL` 疑難排解請看：[`docs/troubleshooting-llm-
 
 Harness Engineering 課程參考筆記請看：[`docs/harness-engineering-reference.md`](docs/harness-engineering-reference.md)
 
+目前架構流程圖與分層說明請看：[`docs/current-architecture-flow.md`](docs/current-architecture-flow.md)
+
 LangGraph + Harness 呼叫自訂 skill 的測試程式請看：[`docs/langgraph-harness-skill-runner.md`](docs/langgraph-harness-skill-runner.md)
 
 漸進式 skills / prompts 載入策略請看：[`docs/progressive-skills-and-prompts.md`](docs/progressive-skills-and-prompts.md)
