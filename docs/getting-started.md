@@ -1,116 +1,81 @@
 # Getting Started
 
-這份文件說明如何把 AI Agent Service 在本機或 Linux server 上跑起來，並確認 **LLM 呼叫**、**SQLite 資料庫**、**SQL 查詢** 都能使用。
+這份文件只保留最短可用流程：啟動服務、確認 LLM、測 `/agent`、測 tool、測 skill runner。
 
-## 1. Clone
+## 1. 取得專案
+
+### 已有 Docker container
+
+```bash
+docker exec -it ai-agent-service-dev bash
+cd /workspace/ai-agent-service
+git pull
+```
+
+如果 container 尚未啟動：
+
+```bash
+docker start ai-agent-service-dev
+docker exec -it ai-agent-service-dev bash
+cd /workspace/ai-agent-service
+git pull
+```
+
+### Native Python
 
 ```bash
 git clone https://github.com/Allen-hsu1116/ai-agent-service.git
 cd ai-agent-service
 ```
 
-## 2. Install
+## 2. 設定 `.env`
+
+如果還沒有 `.env`：
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
+cp .env.server.example .env
 ```
 
-如果要跑測試與 lint：
-
-```bash
-pip install -e '.[dev]'
-```
-
-## 3. Configure Environment
-
-```bash
-cp .env.example .env
-```
-
-編輯 `.env`：
-
-```bash
-nano .env
-```
-
-最小設定：
+常見 local OpenAI-compatible gateway 設定：
 
 ```env
 AI_PROVIDER=openai-compatible
-LLM_BASE_URL=https://api.openai.com/v1
-LLM_MODEL=gpt-4o-mini
-LLM_API_KEY=your_api_key_here
+LLM_BASE_URL=http://localhost:8080/v1
+LLM_MODEL=Qwen3.5-35B
+LLM_API_KEY=
 LLM_TEMPERATURE=0.2
 DATABASE_URL=sqlite:///./data/agent.db
 ```
 
-### OpenAI-compatible Provider
+注意：
 
-目前預設使用 OpenAI-compatible `/chat/completions` API，所以可以接：
-
-- OpenAI
-- OpenRouter
-- vLLM OpenAI-compatible server
-- Ollama OpenAI-compatible endpoint
-- LM Studio
-- llama.cpp server
-- 其他相容服務
-
-只要調整：
+- `LLM_BASE_URL` 不要包含 `/health`。
+- 程式會自動呼叫 `{LLM_BASE_URL}/chat/completions`。
+- 如果 AI Agent Service 在 Docker container 裡，但模型 gateway 在 host 主機上，通常要改成：
 
 ```env
-LLM_BASE_URL=https://your-provider.example.com/v1
-LLM_MODEL=your-model-name
-LLM_API_KEY=your_api_key
+LLM_BASE_URL=http://host.docker.internal:8080/v1
 ```
 
-### SQLite Database
+更多 404 排查看：[`troubleshooting-llm-404.md`](troubleshooting-llm-404.md)
 
-預設：
+## 3. 啟動服務
 
-```env
-DATABASE_URL=sqlite:///./data/agent.db
+### Container 內
+
+```bash
+bash scripts/run-in-container.sh
 ```
 
-第一次啟動服務時會自動建立：
-
-- `sessions`
-- `messages`
-- `agent_runs`
-- `tool_calls`
-
-## 4. Start Server
-
-建議使用內建 script 啟動，因為它會自動載入 `.env`：
+### Native Python
 
 ```bash
 bash scripts/run-local.sh
 ```
 
-如果你要手動啟動，請先把 `.env` 載入 shell，否則 Python process 讀不到環境變數：
+使用 `bash scripts/...` 是為了避免 `.sh` executable bit 遺失造成 `Permission denied`。
 
-```bash
-set -a
-source .env
-set +a
-uvicorn ai_agent_service.main:app --host 0.0.0.0 --port 8020 --reload
-```
-
-預設服務位置：
-
-```text
-http://127.0.0.1:8020
-```
-
-Swagger UI：
-
-```text
-http://127.0.0.1:8020/docs
-```
-
-## 5. Health Check
+## 4. 測健康檢查
 
 ```bash
 curl http://127.0.0.1:8020/health
@@ -122,119 +87,23 @@ curl http://127.0.0.1:8020/health
 {"status":"ok"}
 ```
 
-## 6. Call the Agent
+## 5. 測 LLM 對話 API
 
 ```bash
 curl -X POST http://127.0.0.1:8020/agent \
   -H 'Content-Type: application/json' \
-  -d '{"message":"請用繁體中文簡短介紹 AI Agent"}'
+  -d '{"message":"請用繁體中文簡短回答：模型連線測試"}'
 ```
 
-回傳範例：
-
-```json
-{
-  "reply": "AI Agent 是可以理解任務、呼叫工具並完成工作的智慧代理程式。",
-  "model": "gpt-4o-mini",
-  "session_id": 1
-}
-```
-
-`session_id` 會自動建立，並存入 SQLite。
-
-## 7. Continue a Session
-
-第二次呼叫時帶入同一個 `session_id`：
-
-```bash
-curl -X POST http://127.0.0.1:8020/agent \
-  -H 'Content-Type: application/json' \
-  -d '{"session_id":1,"message":"請再講一個實際使用場景"}'
-```
-
-目前 runtime 會保存 session/message，但尚未把歷史訊息全部送進 LLM context。這部分後續可以接 `PromptBuilder` 與 conversation history。
-
-## 8. Query Session Messages
+查詢對話紀錄：
 
 ```bash
 curl http://127.0.0.1:8020/sessions/1/messages
 ```
 
-回傳範例：
+## 6. 測 Tool Registry
 
-```json
-{
-  "session_id": 1,
-  "messages": [
-    {
-      "role": "user",
-      "content": "請用繁體中文簡短介紹 AI Agent"
-    },
-    {
-      "role": "assistant",
-      "content": "AI Agent 是可以理解任務、呼叫工具並完成工作的智慧代理程式。"
-    }
-  ]
-}
-```
-
-## 9. Read-only SQL Query
-
-可以用 `/sql/query` 查 SQLite 裡的資料。
-
-```bash
-curl -X POST http://127.0.0.1:8020/sql/query \
-  -H 'Content-Type: application/json' \
-  -d '{"query":"SELECT id, session_id, role, content FROM messages ORDER BY id"}'
-```
-
-回傳範例：
-
-```json
-{
-  "columns": ["id", "session_id", "role", "content"],
-  "rows": [
-    {
-      "id": 1,
-      "session_id": 1,
-      "role": "user",
-      "content": "請用繁體中文簡短介紹 AI Agent"
-    }
-  ],
-  "row_count": 1
-}
-```
-
-目前只允許 read-only 查詢：
-
-- `SELECT`
-- `WITH`
-- `PRAGMA`
-- `EXPLAIN`
-
-會拒絕：
-
-- `INSERT`
-- `UPDATE`
-- `DELETE`
-- `DROP`
-- `ALTER`
-- `CREATE`
-- 多段 SQL statement
-
-例如這個會被拒絕：
-
-```bash
-curl -X POST http://127.0.0.1:8020/sql/query \
-  -H 'Content-Type: application/json' \
-  -d '{"query":"DELETE FROM messages"}'
-```
-
-## 10. Phase 2 Tool Registry Demo
-
-這個版本已經有基礎 Tool Registry / Tool Executor。範例 tool 是 `jimmy_visit_document`：它會讀取一份 UTF-8 文字文件，並寫出一份加上 `Jimmy 到此一遊` 的新文件。
-
-查詢可用 tools：
+查詢 tools：
 
 ```bash
 curl http://127.0.0.1:8020/tools
@@ -247,7 +116,7 @@ mkdir -p examples/runtime
 printf '這是一份測試文件。\n' > examples/runtime/source.txt
 ```
 
-執行 tool：
+執行範例 tool：
 
 ```bash
 curl -X POST http://127.0.0.1:8020/tools/jimmy_visit_document/run \
@@ -274,7 +143,7 @@ cat examples/runtime/visited.txt
 Jimmy 到此一遊
 ```
 
-檢查 tool call log：
+查詢 tool log：
 
 ```bash
 curl -X POST http://127.0.0.1:8020/sql/query \
@@ -282,108 +151,43 @@ curl -X POST http://127.0.0.1:8020/sql/query \
   -d '{"query":"SELECT tool_name, status, side_effect FROM tool_calls ORDER BY id"}'
 ```
 
-## 11. Docker Start
-
-如果你已經自己建立好 Docker container，請優先用這個流程。更多細節請看：[`docs/server-deployment.md`](server-deployment.md)
-
-Host 上進入既有 container：
+## 7. 測 LangGraph + Skill Runner
 
 ```bash
-docker exec -it ai-agent-service-dev bash
+PYTHONPATH=src python3 examples/langgraph_skill_runner.py \
+  --skill examples/skills/jimmy-visit-skill/SKILL.md \
+  --input examples/runtime/source.txt \
+  --output examples/runtime/skill-output.txt \
+  --json
 ```
 
-如果 container 還沒啟動：
+如果只有 `python`：
 
 ```bash
-docker start ai-agent-service-dev
-docker exec -it ai-agent-service-dev bash
+PYTHONPATH=src python examples/langgraph_skill_runner.py \
+  --skill examples/skills/jimmy-visit-skill/SKILL.md \
+  --input examples/runtime/source.txt \
+  --output examples/runtime/skill-output.txt \
+  --json
 ```
 
-Container 內取得專案並啟動：
+預期重點：
 
-```bash
-mkdir -p /workspace
-cd /workspace
-
-# 如果還沒有下載 repo
-git clone https://github.com/Allen-hsu1116/ai-agent-service.git
-cd ai-agent-service
-
-cp .env.server.example .env
-# 依你的 container 網路調整 LLM_BASE_URL：
-# - 連 server 主機模型 gateway: http://host.docker.internal:8080/api/v1
-# - 連同 network 的模型 container: http://model-gateway:8080/api/v1
-# - host network: http://localhost:8080/api/v1
-
-bash scripts/run-in-container.sh
+```json
+{
+  "selected_tool": "jimmy_visit_document",
+  "status": "verified",
+  "steps": ["initialize", "load_skill", "execute_tool", "verify"]
+}
 ```
 
-如果你的 container 已經有 repo，直接 `cd` 到專案根目錄後從 `cp .env.server.example .env` 開始。
-
-> 若你執行 `.sh` 遇到 `Permission denied`，請改用 `bash scripts/run-in-container.sh`，或先執行 `chmod +x scripts/run-in-container.sh` 後再用 `./scripts/run-in-container.sh`。
-
-如果你還沒建立 container，可以參考：
-
-```bash
-docker run -it \
-  --name ai-agent-service-dev \
-  -p 8020:8020 \
-  --add-host=host.docker.internal:host-gateway \
-  -v "$PWD:/workspace/ai-agent-service" \
-  -w /workspace/ai-agent-service \
-  python:3.11-slim \
-  bash
-```
-
-如果使用 Docker Compose：
-
-```bash
-cp .env.example .env
-# edit .env first
-docker compose up -d --build
-```
-
-確認：
-
-```bash
-curl http://127.0.0.1:8020/health
-```
-
-如果當初 container 沒有 `-p 8020:8020`，host 可能連不到 `127.0.0.1:8020`，請在 container 內測：
-
-```bash
-curl http://127.0.0.1:8020/health
-```
-
-更多 Docker 說明：[`docs/docker-deployment.md`](docker-deployment.md)
-
-## 12. Run Tests
+## 8. 測試與 lint
 
 ```bash
 PYTHONPATH=src python -m pytest -q
 PYTHONPATH=src python -m ruff check .
 ```
 
-## 13. Current Scope
+## 9. 下一步：新增自己的 Skill 和 Tool
 
-這個版本刻意先把範例功能拿掉，專注在可以實際使用的基礎功能：
-
-- LLM 呼叫
-- SQLite / SQLAlchemy
-- 對話儲存
-- read-only SQL 查詢
-- Tool Registry / Tool Executor
-- `jimmy_visit_document` 文件寫入範例 tool
-- `tool_calls` 執行紀錄
-- Docker 啟動
-
-後續再逐步加入：
-
-- PromptBuilder
-- conversation history injection
-- tool-calling agent loop
-- SkillLoader / progressive skill runtime
-- MCP
-- auth / RBAC
-- background jobs
-- observability
+請看：[`skills-and-tools.md`](skills-and-tools.md)

@@ -1,54 +1,51 @@
 # Examples
 
-這個資料夾放的是 **範例資料**，供後續系統撰寫 skills 與 prompts 時參考。
+這裡只保留目前會直接用到的 runnable examples。舊版或較大的參考範例已移到 `examples/archive/`，避免入口太亂。
 
-目前 runtime 還不會自動載入這些檔案；它們的用途是定義風格、欄位、結構與品質標準。
-
-## Skills Examples
+## Active Examples
 
 ```text
-examples/skills/
-├── api-data-analysis-pipeline/
-│   ├── SKILL.md
-│   ├── references/
-│   ├── templates/
-│   └── appendix/
-├── local-model-connection-check/SKILL.md
-├── server-container-runbook/SKILL.md
-└── sqlite-readonly-inspection/SKILL.md
+examples/
+├── langgraph_skill_runner.py
+└── skills/
+    └── jimmy-visit-skill/
+        └── SKILL.md
 ```
 
-Skill 是可重複使用的操作手冊，重點是：
+### `langgraph_skill_runner.py`
 
-- 何時使用
-- 前置檢查
-- 操作步驟
-- 常見錯誤
-- 驗證方式
+用 LangGraph + Harness 流程載入 `SKILL.md`，再透過 `ToolRegistry` / `ToolExecutor` 呼叫對應 tool。
 
-## Prompt Examples
+### `skills/jimmy-visit-skill/SKILL.md`
+
+最小可測試 skill：
+
+```yaml
+tool: jimmy_visit_document
+```
+
+用途：讀取一份文字文件，輸出一份加上 `Jimmy 到此一遊` 的文件。
+
+## Runtime Files
+
+測試時可把暫存輸入/輸出放在：
 
 ```text
-examples/prompts/
-├── api-data-analysis.prompt.md
-├── base-system.prompt.md
-├── progressive-skill-loader.prompt.md
-├── task-router.prompt.md
-├── skill-writer.prompt.md
-└── prompt-writer.prompt.md
+examples/runtime/
 ```
 
-Prompt 是模型輸入模板，重點是：
+這個資料夾已被 `.gitignore` 忽略，不應提交。
 
-- 角色與目標
-- 可用 context
-- 安全規則
-- 輸出格式
-- 禁止事項
+## Archived Examples
 
-## Notes
+舊範例放在：
 
-- 不要把 `.env`、API key、密碼放進 examples。
-- 範例可以包含 placeholder，例如 `${PROJECT_ROOT}`、`${LLM_BASE_URL}`。
-- 範例應該可被 validator 檢查，不要只寫散文。
-- 複雜 skill 優先採用漸進式結構：`SKILL.md` 當目錄，`references/` 放正文，`templates/` 放輸出模板，`appendix/` 放低頻深入內容。
+```text
+examples/archive/
+```
+
+包含早期 prompts、progressive skill 範例、server runbook 等。之後若要恢復使用，請先整理進 active docs，不要直接再新增平行版本。
+
+## 新增自己的 Skill / Tool
+
+請看：[`../docs/skills-and-tools.md`](../docs/skills-and-tools.md)

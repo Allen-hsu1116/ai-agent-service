@@ -419,7 +419,7 @@ flowchart BT
 
 ## 7. 漸進式 Skill / Prompt 載入流程
 
-目前已有文件定義方向：`docs/progressive-skills-and-prompts.md`。下面是建議未來 `SkillLoader` / `PromptBuilder` 的流程。
+目前 canonical 教學集中在 `docs/skills-and-tools.md`；舊版 progressive loading 筆記已移到 `docs/archive/progressive-skills-and-prompts.md`。下面是建議未來 `SkillLoader` / `PromptBuilder` 的流程。
 
 ```mermaid
 flowchart TD
