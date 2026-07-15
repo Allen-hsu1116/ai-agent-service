@@ -52,6 +52,7 @@ curl http://127.0.0.1:8020/tools
 | [`docs/getting-started.md`](docs/getting-started.md) | 安裝、啟動、基本測試 |
 | [`docs/current-architecture-flow.md`](docs/current-architecture-flow.md) | 目前架構與流程圖 |
 | [`docs/skills-and-tools.md`](docs/skills-and-tools.md) | 下一階段：新增自己的 Skill 與 Tool 教學 |
+| [`docs/hermes-company-deployment.md`](docs/hermes-company-deployment.md) | 公司部署 Hermes 的安全、穩定與上線檢查基線 |
 | [`docs/troubleshooting-llm-404.md`](docs/troubleshooting-llm-404.md) | LLM_BASE_URL / 404 疑難排解 |
 
 舊版或參考型文件已移到：[`docs/archive/`](docs/archive/)

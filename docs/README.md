@@ -14,6 +14,7 @@
 | [`getting-started.md`](getting-started.md) | 安裝、啟動、基本 API / Tool / Skill Runner smoke test |
 | [`current-architecture-flow.md`](current-architecture-flow.md) | 目前架構流程圖、狀態管理、分層說明 |
 | [`skills-and-tools.md`](skills-and-tools.md) | 如何新增自己的 Skill 與 Tool |
+| [`hermes-company-deployment.md`](hermes-company-deployment.md) | 公司部署 Hermes 的安全、穩定與上線檢查基線 |
 | [`troubleshooting-llm-404.md`](troubleshooting-llm-404.md) | LLM_BASE_URL、OpenAI-compatible endpoint、404 排查 |
 
 ## Archived Reference Docs
